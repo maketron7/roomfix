@@ -5,7 +5,12 @@ const cors = require('cors');
 const complaints = require('./routes/complaints');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://roomfix-frontend.vercel.app'
+}));
+app.get('/', (req, res) => {
+  res.send('RoomFix Backend is Running 🚀');
+});
 app.use(express.json());
 app.use('/api/complaints', complaints);
 
