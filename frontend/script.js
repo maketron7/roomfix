@@ -1,69 +1,52 @@
-const express = require('express');
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const Complaint = require('../models/Complaint'); // Adjust if path is different
+const form = document.getElementById('complaintForm');
+const list = document.getElementById('complaintList');
+const message = document.getElementById('message');
 
-const router = express.Router();
-
-// 🔧 Multer setup for memory storage
-const upload = multer({ storage: multer.memoryStorage() });
-
-// 🌥 Cloudinary config
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET
-});
-
-// 📤 POST /api/complaints — Add complaint with image
-router.post('/', upload.single('image'), async (req, res) => {
-  const { room, description } = req.body;
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const formData = new FormData(form);
 
   try {
-    const stream = cloudinary.uploader.upload_stream(
-      { resource_type: 'image' },
-      async (err, result) => {
-        if (err) return res.status(500).json({ error: err });
+    const res = await fetch('https://roomfix-1.onrender.com/api/complaints', {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) throw new Error('Failed to submit complaint');
+    message.style.color = 'green';
+    message.textContent = 'Complaint submitted successfully!';
+    form.reset();
+    loadComplaints();
+  } catch (err) {
+    console.error(err);
+    message.style.color = 'red';
+    message.textContent = 'Error submitting complaint.';
+  }
 
-        const complaint = new Complaint({
-          room,
-          description,
-          imageUrl: result.secure_url
-        });
+  setTimeout(() => { message.textContent = ''; }, 3000);
+});
 
-        await complaint.save();
-        res.json(complaint);
+async function loadComplaints() {
+  try {
+    const res = await fetch('https://roomfix-1.onrender.com/api/complaints');
+    const complaints = await res.json();
+    list.innerHTML = '';
+    complaints.forEach(c => {
+      const li = document.createElement('li');
+      li.innerHTML = `<b>${c.room}</b>: ${c.description}<br><img src="${c.imageUrl}"><br>Status: ${c.status}`;
+      if (c.status !== 'Resolved') {
+        const btn = document.createElement('button');
+        btn.textContent = 'Mark Resolved';
+        btn.onclick = async () => {
+          await fetch(`https://roomfix-1.onrender.com/api/complaints/${c._id}`, { method: 'PUT' });
+          loadComplaints();
+        };
+        li.appendChild(btn);
       }
-    );
-
-    req.file.stream.pipe(stream);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Loading error:', err);
   }
-});
+}
 
-// ✅ GET /api/complaints — Get all complaints
-router.get('/', async (req, res) => {
-  try {
-    const complaints = await Complaint.find().sort({ createdAt: -1 });
-    res.json(complaints);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 🔄 PUT /api/complaints/:id — Mark as resolved
-router.put('/:id', async (req, res) => {
-  try {
-    const complaint = await Complaint.findByIdAndUpdate(
-      req.params.id,
-      { status: 'Resolved' },
-      { new: true }
-    );
-    res.json(complaint);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-module.exports = router;
+loadComplaints();
