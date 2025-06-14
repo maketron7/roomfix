@@ -4,7 +4,7 @@ const list = document.getElementById('complaintList');
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = new FormData(form);
-  await fetch('https://roomfix-dyio.onrender.com/api/complaints', {
+  await fetch('https://roomfix-1.onrender.com/api/complaints', {
     method: 'POST',
     body: formData
   });
@@ -13,7 +13,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function loadComplaints() {
-  const res = await fetch('https://roomfix-dyio.onrender.com/api/complaints');
+  const res = await fetch('https://roomfix-1.onrender.com/api/complaints');
   const complaints = await res.json();
   list.innerHTML = '';
   complaints.forEach(({ _id, room, description, imageUrl, status }) => {
@@ -23,7 +23,7 @@ async function loadComplaints() {
       const btn = document.createElement('button');
       btn.textContent = 'Mark Resolved';
       btn.onclick = async () => {
-        await fetch(`https://roomfix-dyio.onrender.com/api/complaints/${_id}`, { method: 'PUT' });
+        await fetch(`https://roomfix-1.onrender.com/api/complaints/${_id}`, { method: 'PUT' });
         loadComplaints();
       };
       li.appendChild(btn);
