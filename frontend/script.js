@@ -1,51 +1,69 @@
-const form = document.getElementById('complaintForm');
-const list = document.getElementById('complaintList');
+const express = require('express');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const Complaint = require('../models/Complaint'); // Adjust if path is different
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const message = document.getElementById('message');
+const router = express.Router();
 
-  try {
-    const res = await fetch('https://roomfix-1.onrender.com/api/complaints', {
-      method: 'POST',
-      body: formData
-    });
+// 🔧 Multer setup for memory storage
+const upload = multer({ storage: multer.memoryStorage() });
 
-    if (!res.ok) throw new Error("Failed to submit complaint");
-
-    message.style.color = 'green';
-    message.textContent = 'Complaint submitted successfully!';
-    form.reset();
-    loadComplaints();
-  } catch (error) {
-    message.style.color = 'red';
-    message.textContent = 'Error submitting complaint. Please try again.';
-  }
-
-  // Hide message after 3 seconds
-  setTimeout(() => {
-    message.textContent = '';
-  }, 3000);
+// 🌥 Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET
 });
 
-async function loadComplaints() {
-  const res = await fetch('https://roomfix-1.onrender.com/api/complaints');
-  const complaints = await res.json();
-  list.innerHTML = '';
-  complaints.forEach(({ _id, room, description, imageUrl, status }) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<b>${room}</b>: ${description}<br><img src=\"${imageUrl}\" width=\"100\"><br>Status: ${status}`;
-    if (status !== 'Resolved') {
-      const btn = document.createElement('button');
-      btn.textContent = 'Mark Resolved';
-      btn.onclick = async () => {
-        await fetch(`https://roomfix-1.onrender.com/api/complaints/${_id}`, { method: 'PUT' });
-        loadComplaints();
-      };
-      li.appendChild(btn);
-    }
-    list.appendChild(li);
-  });
-}
+// 📤 POST /api/complaints — Add complaint with image
+router.post('/', upload.single('image'), async (req, res) => {
+  const { room, description } = req.body;
 
-loadComplaints();
+  try {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: 'image' },
+      async (err, result) => {
+        if (err) return res.status(500).json({ error: err });
+
+        const complaint = new Complaint({
+          room,
+          description,
+          imageUrl: result.secure_url
+        });
+
+        await complaint.save();
+        res.json(complaint);
+      }
+    );
+
+    req.file.stream.pipe(stream);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ GET /api/complaints — Get all complaints
+router.get('/', async (req, res) => {
+  try {
+    const complaints = await Complaint.find().sort({ createdAt: -1 });
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 🔄 PUT /api/complaints/:id — Mark as resolved
+router.put('/:id', async (req, res) => {
+  try {
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Resolved' },
+      { new: true }
+    );
+    res.json(complaint);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;
