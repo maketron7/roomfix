@@ -3,13 +3,29 @@ const list = document.getElementById('complaintList');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = new FormData(form);
-  await fetch('https://roomfix-1.onrender.com/api/complaints', {
-    method: 'POST',
-    body: formData
-  });
-  form.reset();
-  loadComplaints();
+  const message = document.getElementById('message');
+
+  try {
+    const res = await fetch('https://roomfix-1.onrender.com/api/complaints', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Failed to submit complaint");
+
+    message.style.color = 'green';
+    message.textContent = 'Complaint submitted successfully!';
+    form.reset();
+    loadComplaints();
+  } catch (error) {
+    message.style.color = 'red';
+    message.textContent = 'Error submitting complaint. Please try again.';
+  }
+
+  // Hide message after 3 seconds
+  setTimeout(() => {
+    message.textContent = '';
+  }, 3000);
 });
 
 async function loadComplaints() {
