@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RoomFix</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>RoomFix: Maintenance Complaint System</h1>
+  <form id="complaintForm">
+    <input type="text" name="room" placeholder="Room Number" required><br>
+    <textarea name="description" placeholder="Describe issue..." required></textarea><br>
+    <input type="file" name="image" required><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <h2>Complaints</h2>
+  <ul id="complaintList"></ul>
+
+  <script src="script.js"></script>
+</body>
+</html>
