@@ -1,8 +1,103 @@
-body {
-  font-family: Arial;
-  padding: 20px;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-input, textarea {
-  display: block;
-  margin-bottom: 10px;
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  padding: 30px;
+  color: #333;
+}
+
+form {
+  background-color: #ffffff;
+  max-width: 500px;
+  margin: auto;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+form h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+input[type="text"],
+textarea,
+input[type="file"] {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+::placeholder {
+  color: #888;
+}
+
+button {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #3e8e41;
+}
+
+#message {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+ul {
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
+  max-width: 500px;
+}
+
+li {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+li img {
+  width: 100%;
+  max-width: 300px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+li button {
+  background-color: #2196F3;
+  margin-top: 10px;
+}
+
+li button:hover {
+  background-color: #0b7dda;
 }

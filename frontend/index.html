@@ -1,21 +1,20 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>RoomFix</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>RoomFix: Maintenance Complaint System</h1>
-  <form id="complaintForm">
-    <input type="text" name="room" placeholder="Room Number" required><br>
-    <textarea name="description" placeholder="Describe issue..." required></textarea><br>
-    <input type="file" name="image" required><br>
+  <form id="complaintForm" enctype="multipart/form-data">
+    <h2>Submit a Complaint</h2>
+    <input type="text" name="room" placeholder="Room Number" required />
+    <textarea name="description" placeholder="Describe the issue..." required></textarea>
+    <input type="file" name="image" accept="image/*" required />
     <button type="submit">Submit</button>
+    <div id="message"></div>
   </form>
-
-  <h2>Complaints</h2>
   <ul id="complaintList"></ul>
-
   <script src="script.js"></script>
 </body>
 </html>

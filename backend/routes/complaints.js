@@ -1,10 +1,10 @@
 const express = require('express');
 const multer = require('multer');
-const Complaint = require('../models/Complaint');
 const cloudinary = require('cloudinary').v2;
-const router = express.Router();
+const Complaint = require('../models/Complaint');
 
 const upload = multer({ storage: multer.memoryStorage() });
+const router = express.Router();
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -14,14 +14,25 @@ cloudinary.config({
 
 router.post('/', upload.single('image'), async (req, res) => {
   const { room, description } = req.body;
+
   try {
-    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, async (err, result) => {
-      if (err) return res.status(500).json({ error: err });
-      const complaint = new Complaint({ room, description, imageUrl: result.secure_url });
-      await complaint.save();
-      res.json(complaint);
-    });
-    req.file.stream.pipe(stream);
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: 'image' },
+      async (err, result) => {
+        if (err) return res.status(500).json({ error: err });
+
+        const complaint = new Complaint({
+          room,
+          description,
+          imageUrl: result.secure_url
+        });
+
+        await complaint.save();
+        res.json(complaint);
+      }
+    );
+
+    stream.end(req.file.buffer);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -33,7 +44,11 @@ router.get('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  const complaint = await Complaint.findByIdAndUpdate(req.params.id, { status: 'Resolved' }, { new: true });
+  const complaint = await Complaint.findByIdAndUpdate(
+    req.params.id,
+    { status: 'Resolved' },
+    { new: true }
+  );
   res.json(complaint);
 });
 
